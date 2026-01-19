@@ -2,6 +2,7 @@ const nodemailer=require('nodemailer');
 // const upload =require('../Middleware/fileupload')
 
 const transporter=nodemailer.createTransport({
+    service:"gmail",
     host:"smtp.gmail.com",
     port:587,
     secure:false,
