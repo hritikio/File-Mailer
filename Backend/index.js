@@ -13,6 +13,13 @@ app.use(cors()) //we can allow specific site also by origin:"websiteUrl.com"
 app.use(express.json());
 
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "FileMailer backend is running",
+  });
+});
+
 
 app.use("/api",mailRoutes);
 
