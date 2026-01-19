@@ -85,7 +85,7 @@ router.post("/send", upload.array("files",5), async(req,res)=>{
         }
 
          res.status(500).json({
-        message: "Failed to send email",
+        message: "Failed to     send email",
         error:err.message
         });
     }
