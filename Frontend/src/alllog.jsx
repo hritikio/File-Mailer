@@ -1,94 +1,86 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import "./AllLogs.css";
 
-export default function Alllogs() {
-  const [alllogs, setallLogs] = useState([]);
+export default function AllLogs({ onLogout }) {
+  const [allLogs, setAllLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  const fetchallLogs = async () => {
+  const fetchAllLogs = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/alllogs");
-      setallLogs(response.data.mappedAllLogs);
-      console.log("alllogs", response.data.mappedAllLogs);
+      setLoading(true);
+      const response = await axios.get("http://localhost:5000/api/alllogs", {
+        withCredentials: true,
+      });
+      setAllLogs(response.data.mappedAllLogs || []);
     } catch (err) {
-      console.log("error in fetching all logs", err);
+      console.log("error fetching all logs", err);
+      if (err.response?.status === 401) {
+        onLogout();
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchallLogs();
+    fetchAllLogs();
   }, []);
 
   return (
-    <div>
-      <h3
-        style={{
-          color: "#e0f2fe",
-          fontSize: "28px",
-          margin: "22px 0 16px",
-          fontWeight: "800",
-        }}
-      >
-        All Logs :
-      </h3>
-      <div>
-        {alllogs.map((logItem) => {
-          const statusText = logItem.status || "";
-          const lowered = statusText.toLowerCase();
-          const statusClass = lowered.includes("success")
-            ? "status-success"
-            : lowered.includes("fail")
-            ? "status-fail"
-            : "status-neutral";
-
-          return (
-            <div
-              key={logItem._id}
-              style={{
-                background:
-                  "linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
-                border: "1px solid rgba(255,255,255,0.08)",
-                margin: "12px 0",
-                padding: "18px",
-                borderRadius: "14px",
-                boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
-                transition:
-                  "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow =
-                  "0 16px 36px rgba(0,0,0,0.45)";
-                e.currentTarget.style.borderColor = "rgba(56,189,248,0.6)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow =
-                  "0 12px 28px rgba(0,0,0,0.35)";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-              }}
-            >
-              <p>
-                <strong>Email:</strong> {logItem.email}
-              </p>
-              <p>
-                <strong>Filename:</strong> {logItem.filename}
-              </p>
-              <p>
-                <strong>Filesize:</strong> {logItem.filesize} 
-              </p>
-              <p>
-                <strong>Status:</strong>{" "}
-                <span className={`status-chip ${statusClass}`}>
-                  {logItem.status}
-                </span>
-              </p>
-              <p>
-                <strong>Created At:</strong> {logItem.createdAt}
-              </p>
-            </div>
-          );
-        })}
+    <div className="all-logs-container">
+      <div className="all-logs-header">
+        <button onClick={() => navigate("/")} className="back-button">
+          ← Back to Home
+        </button>
+        <h2>All Your Logs</h2>
       </div>
+
+      {loading ? (
+        <div className="loading-state">Loading...</div>
+      ) : allLogs.length === 0 ? (
+        <div className="empty-state">
+          <p>📭 No logs found</p>
+          <p>Send some files to see them here!</p>
+        </div>
+      ) : (
+        <div className="logs-grid">
+          {allLogs.map((logItem, idx) => {
+            const statusClass = logItem.status
+              ?.toLowerCase()
+              .includes("success")
+              ? "status-success"
+              : "status-fail";
+
+            return (
+              <div key={idx} className="all-log-card">
+                <div className="log-header-row">
+                  <span className={`status-badge ${statusClass}`}>
+                    {logItem.status}
+                  </span>
+                  <span className="log-date">{logItem.createdAt}</span>
+                </div>
+                <div className="log-details">
+                  <div className="log-detail-item">
+                    <span className="label">To:</span>
+                    <span className="value">{logItem.email}</span>
+                  </div>
+                  <div className="log-detail-item">
+                    <span className="label">File:</span>
+                    <span className="value">{logItem.filename}</span>
+                  </div>
+                  <div className="log-detail-item">
+                    <span className="label">Size:</span>
+                    <span className="value">{logItem.filesize}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
