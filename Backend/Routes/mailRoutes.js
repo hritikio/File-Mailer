@@ -18,18 +18,12 @@ router.post(
     // Check if user is authenticated (either admin or regular user)
     if (!req.userId && !req.isAdmin) {
       return res.status(401).json({
-        message: "User authentication required for sending emails",
+        message: "Authentication required for sending emails",
       });
     }
 
-    // Admin cannot send emails, only users can
-    if (req.isAdmin) {
-      return res.status(403).json({
-        message: "Admin cannot send emails. Please login as a user.",
-      });
-    }
-
-    const userId = req.userId;
+    // For admin, we won't have userId, so we'll use a placeholder or skip logging
+    const userId = req.userId || null;
 
     if (!email || !files || files.length === 0) {
       return res.status(404).json({
