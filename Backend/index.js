@@ -3,7 +3,8 @@ const app=express();
 require('dotenv').config();
 const cors=require('cors');
 const mailRoutes = require("./Routes/mailRoutes"); //mailRoutes=router
-const authRoutes=require("./Auth/auth")
+const userRoutes=require("./Auth/userauth")
+const adminRoutes=require("./Auth/adminauth")
 const cookieParser = require('cookie-parser');
 
 const connectDB=require('./Config/mongodb'); // importing function from mongodb.js
@@ -22,7 +23,8 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/auth", authRoutes);
+app.use("/auth/user", userRoutes);
+app.use("/auth/admin", adminRoutes);
 app.use("/api",mailRoutes);
 
 app.listen(process.env.PORT,()=>{
