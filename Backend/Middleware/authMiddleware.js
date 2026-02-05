@@ -6,30 +6,38 @@ const authMiddleware = async (req, res, next) => {
     const userToken = req.cookies.jwt;
     const adminToken = req.cookies.jwtAdmin;
 
+    console.log(
+      "Cookies received - userToken:",
+      !!userToken,
+      "adminToken:",
+      !!adminToken,
+    );
+
     if (!userToken && !adminToken) {
       return res.status(401).json({
         message: "Authentication required. Please login.",
       });
     }
 
-    // Prioritize user token if both exist
-    if (userToken) {
+    // Prioritize admin token if it exists
+    if (adminToken) {
       try {
-        const decoded = jwt.verify(userToken, process.env.JWT_ADMIN);
-        req.userId = decoded.id;
-        req.isAdmin = false;
+        const decoded = jwt.verify(adminToken, process.env.ADMIN_PASS);
+        req.isAdmin = true;
+        req.adminName = decoded.name;
+        console.log("Admin authenticated:", decoded.name, "isAdmin:", true);
         return next();
       } catch (err) {
-        // User token invalid, try admin token
-        console.log("User token invalid, checking admin token");
+        console.log("Admin token invalid:", err.message);
       }
     }
 
-    // Check if admin token exists and is valid
-    if (adminToken) {
-      const decoded = jwt.verify(adminToken, process.env.ADMIN_PASS);
-      req.isAdmin = true;
-      req.adminName = decoded.name;
+    // Check user token if admin token doesn't exist or is invalid
+    if (userToken) {
+      const decoded = jwt.verify(userToken, process.env.JWT_ADMIN);
+      req.userId = decoded.id;
+      req.isAdmin = false;
+      console.log("User authenticated:", decoded.id, "isAdmin:", false);
       return next();
     }
 

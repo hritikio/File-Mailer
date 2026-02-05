@@ -147,9 +147,17 @@ router.get("/5logs", authMiddleware, async (req, res) => {
 
 router.get("/alllogs", authMiddleware, async (req, res) => {
   try {
+    console.log(
+      "Fetching all logs - isAdmin:",
+      req.isAdmin,
+      "userId:",
+      req.userId,
+    );
     // If admin, show all logs; if user, show only their logs
     const filter = req.isAdmin ? {} : { userId: req.userId };
+    console.log("Filter being used:", filter);
     const allLogs = await log.find(filter).sort({ createdAt: -1 }).lean();
+    console.log("Total logs found:", allLogs.length);
 
     allLogs.forEach((Log) => (Log.createdAt = istTime(Log.createdAt)));
 

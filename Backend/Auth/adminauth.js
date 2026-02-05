@@ -35,24 +35,22 @@ router.post("/login", async (req, res) => {
 
     console.log("jwt is ", token);
 
-    res.cookie("jwtAdmin",token,{
-        secure:true,
-        maxAge:7*24*60*60*1000
-    })
+    res.cookie("jwtAdmin", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     res.json({
-        msg:"Admin Logged in succesfully ",
-        token
-    })
-  }
-  else{
+      msg: "Admin Logged in succesfully ",
+      token,
+    });
+  } else {
     res.status(411).json({
-        msg:"Admin Credentials are wrong "
-    })
+      msg: "Admin Credentials are wrong ",
+    });
   }
-
-  
-
 });
 
-module.exports=router
+module.exports = router;
